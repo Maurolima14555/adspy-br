@@ -69,15 +69,17 @@ Base = declarative_base()
 
 class Usuario(Base):
     __tablename__ = "usuarios"
-    id            = Column(Integer, primary_key=True, index=True)
-    email         = Column(String, unique=True, index=True)
-    nome          = Column(String)
-    senha_hash    = Column(String)
-    plano         = Column(String, default="free")
-    ativo         = Column(Boolean, default=True)
-    criado_em     = Column(DateTime, default=datetime.utcnow)
-    buscas_hoje   = Column(Integer, default=0)
-    ultima_busca  = Column(String, default="")  # data em string
+    id                  = Column(Integer, primary_key=True, index=True)
+    email               = Column(String, unique=True, index=True)
+    nome                = Column(String)
+    senha_hash          = Column(String)
+    plano               = Column(String, default="free")
+    ativo               = Column(Boolean, default=True)
+    criado_em           = Column(DateTime, default=datetime.utcnow)
+    buscas_hoje         = Column(Integer, default=0)
+    ultima_busca        = Column(String, default="")  # data em string
+    stripe_customer_id  = Column(String, default="")
+    stripe_sub_id       = Column(String, default="")
 
 
 Base.metadata.create_all(bind=engine)
