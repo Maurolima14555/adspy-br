@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdSpy BR</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f0f0f; color: #f0f0f0; min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav { padding: 16px 32px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 20px; font-weight: 700; }
+    .logo span { color: #4f8ef7; }
+    .nav-right { display: flex; gap: 12px; align-items: center; }
+    .btn { padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-outline { background: transparent; border: 1px solid #333; color: #aaa; }
+    .btn-outline:hover { border-color: #4f8ef7; color: #4f8ef7; }
+    .btn-primary { background: #4f8ef7; color: #fff; }
+    .btn-primary:hover { background: #3a7de0; }
+    .user-badge { font-size: 13px; color: #888; }
+    .plano-badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; background: #1a2e1a; color: #4ade80; margin-left: 8px; }
+    .plano-badge.pro { background: #1a1a2e; color: #818cf8; }
+    .plano-badge.elite { background: #2e1a1a; color: #f87171; }
+
+    /* ── MODAL ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+    .overlay.show { display: flex; }
+    .modal { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 16px; padding: 32px; width: 100%; max-width: 400px; }
+    .modal h2 { font-size: 22px; margin-bottom: 8px; }
+    .modal p { color: #666; font-size: 14px; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; color: #888; margin-bottom: 6px; }
+    .form-group input { width: 100%; padding: 12px 14px; background: #111; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 15px; outline: none; }
+    .form-group input:focus { border-color: #4f8ef7; }
+    .modal-footer { display: flex; gap: 10px; margin-top: 8px; }
+    .modal-footer button { flex: 1; }
+    .toggle-link { text-align: center; margin-top: 16px; font-size: 13px; color: #666; cursor: pointer; }
+    .toggle-link span { color: #4f8ef7; text-decoration: underline; }
+    .error-msg { color: #f87171; font-size: 13px; margin-top: 8px; display: none; }
+
+    /* ── HERO ── */
+    .hero { text-align: center; padding: 56px 24px 32px; }
+    .hero h1 { font-size: 40px; font-weight: 800; line-height: 1.2; margin-bottom: 14px; }
+    .hero h1 span { color: #4f8ef7; }
+    .hero p { color: #888; font-size: 17px; margin-bottom: 36px; }
+
+    /* ── SEARCH ── */
+    .search-wrap { max-width: 560px; margin: 0 auto 36px; }
+    .search-box { display: flex; gap: 10px; }
+    .search-box input { flex: 1; padding: 14px 18px; border-radius: 10px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 15px; outline: none; }
+    .search-box input:focus { border-color: #4f8ef7; }
+    .search-box button { padding: 14px 24px; background: #4f8ef7; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .search-box button:hover { background: #3a7de0; }
+    .buscas-restantes { font-size: 12px; color: #444; text-align: right; margin-top: 8px; }
+
+    /* ── FILTROS ── */
+    .filters { display: flex; gap: 8px; justify-content: center; margin-bottom: 36px; flex-wrap: wrap; }
+    .filter-btn { padding: 7px 16px; border-radius: 20px; border: 1px solid #333; background: transparent; color: #888; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+    .filter-btn.active, .filter-btn:hover { border-color: #4f8ef7; color: #4f8ef7; background: #0f1a2e; }
+
+    /* ── STATS ── */
+    .stats-bar { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 36px; padding: 18px 24px; background: #1a1a1a; border-radius: 12px; max-width: 800px; margin-left: auto; margin-right: auto; }
+    .stat .value { font-size: 26px; font-weight: 700; color: #4f8ef7; }
+    .stat .label { font-size: 12px; color: #555; margin-top: 3px; }
+
+    /* ── PADRÕES ── */
+    .padroes-section { max-width: 900px; margin: 0 auto 32px; padding: 0 24px; }
+    .padroes-section h2 { font-size: 18px; margin-bottom: 14px; }
+    .padroes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+    .padrao-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 14px; text-align: center; }
+    .padrao-card.top { border-color: #4f8ef7; background: #0f1a2e; }
+    .padrao-nome { font-size: 12px; color: #666; margin-bottom: 6px; }
+    .padrao-count { font-size: 28px; font-weight: 700; color: #4f8ef7; }
+
+    /* ── ADS ── */
+    .section-title { max-width: 900px; margin: 0 auto 16px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+    .section-title h2 { font-size: 18px; }
+    .sort-select { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 6px 10px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+    .ads-grid { max-width: 900px; margin: 0 auto; padding: 0 24px 64px; display: grid; gap: 14px; }
+    .ad-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 14px; padding: 18px 22px; display: grid; grid-template-columns: 1fr auto; gap: 14px; transition: border-color 0.2s; }
+    .ad-card:hover { border-color: #4f8ef7; }
+    .ad-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .ad-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #4f8ef7, #a855f7); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    .ad-page { font-weight: 600; font-size: 14px; }
+    .ad-time { font-size: 11px; color: #555; margin-top: 2px; }
+    .ad-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .ad-body { font-size: 13px; color: #777; line-height: 1.6; }
+    .ad-meta { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .tag { font-size: 11px; padding: 3px 8px; border-radius: 5px; }
+    .tag.green { background: #0f2a1a; color: #4ade80; }
+    .tag.blue { background: #0f1a2e; color: #60a5fa; }
+    .tag.purple { background: #1a0f2e; color: #c084fc; }
+    .tag.gray { background: #222; color: #888; }
+    .ad-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; min-width: 90px; }
+    .dias-badge { background: #0f2a1a; color: #4ade80; padding: 6px 10px; border-radius: 8px; font-size: 13px; font-weight: 600; text-align: center; }
+    .dias-badge small { display: block; font-size: 10px; opacity: 0.7; }
+
+    /* ── PLANOS ── */
+    .planos-section { max-width: 900px; margin: 0 auto 64px; padding: 0 24px; text-align: center; }
+    .planos-section h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .planos-section p { color: #666; margin-bottom: 32px; }
+    .planos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .plano-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 14px; padding: 28px 24px; text-align: left; }
+    .plano-card.destaque { border-color: #4f8ef7; }
+    .plano-nome { font-size: 13px; color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .plano-preco { font-size: 36px; font-weight: 800; margin-bottom: 4px; }
+    .plano-preco small { font-size: 14px; color: #666; }
+    .plano-features { list-style: none; margin: 20px 0 24px; display: flex; flex-direction: column; gap: 10px; }
+    .plano-features li { font-size: 14px; color: #888; display: flex; align-items: center; gap: 8px; }
+    .plano-features li::before { content: "✓"; color: #4ade80; font-weight: 700; }
+    .plano-features li.no { color: #444; }
+    .plano-features li.no::before { content: "✗"; color: #444; }
+
+    /* ── LOCK ── */
+    .lock-banner { background: #1a1a0f; border: 1px solid #444; border-radius: 10px; padding: 14px 18px; text-align: center; font-size: 13px; color: #888; margin: 16px 24px; max-width: 900px; margin-left: auto; margin-right: auto; display: none; }
+    .lock-banner a { color: #4f8ef7; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Ad<span>Spy</span> BR</div>
+  <div class="nav-right" id="navRight">
+    <button class="btn btn-outline" onclick="abrirModal('login')">Entrar</button>
+    <button class="btn btn-primary" onclick="abrirModal('cadastro')">Começar grátis</button>
+  </div>
+</nav>
+
+<!-- MODAL AUTH -->
+<div class="overlay" id="overlay" onclick="fecharModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2 id="modalTitulo">Criar conta</h2>
+    <p id="modalDesc">Comece grátis — 3 buscas por dia sem cartão.</p>
+
+    <div class="form-group" id="nomeGroup">
+      <label>Nome</label>
+      <input type="text" id="inputNome" placeholder="Seu nome" />
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="inputEmail" placeholder="seu@email.com" />
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="inputSenha" placeholder="Mínimo 6 caracteres" />
+    </div>
+    <div class="error-msg" id="authError"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitAuth()">Entrar</button>
+    </div>
+    <div class="toggle-link" id="toggleLink">
+      Já tem conta? <span onclick="toggleModal()">Entrar</span>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Encontre os anúncios<br/><span>que estão vendendo agora</span></h1>
+  <p>Descubra padrões vencedores do seu nicho em segundos.</p>
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Ex: suplementos, cursos, emagrecimento..." />
+      <button onclick="buscar()">Buscar</button>
+    </div>
+    <div class="buscas-restantes" id="buscasRestantes"></div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filtrar('todos', this)">Todos</button>
+    <button class="filter-btn" onclick="filtrar('antes_depois', this)">Antes/Depois</button>
+    <button class="filter-btn" onclick="filtrar('urgencia', this)">Urgência</button>
+    <button class="filter-btn" onclick="filtrar('autoridade', this)">Autoridade</button>
+    <button class="filter-btn" onclick="filtrar('prova_social', this)">Prova Social</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar" id="statsBar" style="display:none">
+  <div class="stat"><div class="value" id="statTotal">—</div><div class="label">Anúncios</div></div>
+  <div class="stat"><div class="value" id="statMedia">—</div><div class="label">Dias ativos (média)</div></div>
+  <div class="stat"><div class="value" id="statFormato">—</div><div class="label">Formato dominante</div></div>
+  <div class="stat"><div class="value" id="statImp">—</div><div class="label">Impressões (máx)</div></div>
+</div>
+
+<!-- PADRÕES -->
+<div class="padroes-section" id="padroesSection" style="display:none">
+  <h2>Padrões detectados</h2>
+  <div class="padroes-grid" id="padroesGrid"></div>
+</div>
+
+<!-- ADS -->
+<div class="lock-banner" id="lockBanner">
+  Você atingiu o limite do plano Free. <a onclick="irParaPlanos()">Faça upgrade para ver mais →</a>
+</div>
+
+<div class="section-title" id="sectionTitle" style="display:none">
+  <h2>Anúncios vencedores</h2>
+  <select class="sort-select" onchange="ordenar(this.value)">
+    <option value="dias">Mais tempo no ar</option>
+    <option value="impressoes">Mais impressões</option>
+  </select>
+</div>
+
+<div class="ads-grid" id="adsGrid"></div>
+
+<!-- PLANOS -->
+<div class="planos-section" id="planosSection">
+  <h2>Escolha seu plano</h2>
+  <p>Comece grátis, escale quando estiver pronto.</p>
+  <div class="planos-grid" id="planosGrid"></div>
+</div>
+
+<script>
+  const API = "http://localhost:8000";
+  let token = localStorage.getItem("token");
+  let usuario = JSON.parse(localStorage.getItem("usuario") || "null");
+  let todosAnuncios = [];
+  let filtroAtual = "todos";
+  let ordenacaoAtual = "dias";
+  let modoModal = "cadastro";
+
+  // ── Inicialização ──
+
+  window.onload = () => {
+    if (token && usuario) renderLogado();
+    carregarPlanos();
+  };
+
+  // ── Auth UI ──
+
+  function renderLogado() {
+    const planoClass = usuario.plano === "pro" ? "pro" : usuario.plano === "elite" ? "elite" : "";
+    document.getElementById("navRight").innerHTML = `
+      <span class="user-badge">Olá, ${usuario.nome} <span class="plano-badge ${planoClass}">${usuario.plano.toUpperCase()}</span></span>
+      <button class="btn btn-outline" onclick="logout()">Sair</button>
+    `;
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+    token = null; usuario = null;
+    document.getElementById("navRight").innerHTML = `
+      <button class="btn btn-outline" onclick="abrirModal('login')">Entrar</button>
+      <button class="btn btn-primary" onclick="abrirModal('cadastro')">Começar grátis</button>
+    `;
+  }
+
+  function abrirModal(modo) {
+    modoModal = modo;
+    document.getElementById("overlay").classList.add("show");
+    atualizarModal();
+    document.getElementById("authError").style.display = "none";
+  }
+
+  function fecharModal(e) {
+    if (!e || e.target === document.getElementById("overlay")) {
+      document.getElementById("overlay").classList.remove("show");
+    }
+  }
+
+  function toggleModal() {
+    modoModal = modoModal === "cadastro" ? "login" : "cadastro";
+    atualizarModal();
+  }
+
+  function atualizarModal() {
+    const isCad = modoModal === "cadastro";
+    document.getElementById("modalTitulo").textContent = isCad ? "Criar conta" : "Entrar";
+    document.getElementById("modalDesc").textContent = isCad ? "Comece grátis — 3 buscas por dia." : "Bem-vindo de volta.";
+    document.getElementById("nomeGroup").style.display = isCad ? "block" : "none";
+    document.querySelector(".modal-footer button.btn-primary").textContent = isCad ? "Criar conta" : "Entrar";
+    document.getElementById("toggleLink").innerHTML = isCad
+      ? 'Já tem conta? <span onclick="toggleModal()">Entrar</span>'
+      : 'Não tem conta? <span onclick="toggleModal()">Criar grátis</span>';
+  }
+
+  async function submitAuth() {
+    const email = document.getElementById("inputEmail").value.trim();
+    const senha = document.getElementById("inputSenha").value;
+    const nome  = document.getElementById("inputNome").value.trim();
+    const errEl = document.getElementById("authError");
+    errEl.style.display = "none";
+
+    try {
+      let resp, data;
+
+      if (modoModal === "cadastro") {
+        resp = await fetch(`${API}/auth/cadastro`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, senha, nome }),
+        });
+      } else {
+        const form = new URLSearchParams({ username: email, password: senha });
+        resp = await fetch(`${API}/auth/login`, { method: "POST", body: form });
+      }
+
+      data = await resp.json();
+      if (!resp.ok) throw new Error(data.detail || "Erro ao autenticar");
+
+      token   = data.access_token;
+      usuario = data.usuario;
+      localStorage.setItem("token", token);
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+
+      renderLogado();
+      fecharModal();
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.style.display = "block";
+    }
+  }
+
+  // ── Busca ──
+
+  async function buscar() {
+    const termo = document.getElementById("searchInput").value.trim();
+    if (!termo) return;
+
+    if (!token) {
+      abrirModal("cadastro");
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${API}/buscar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ termo }),
+      });
+
+      if (resp.status === 429) {
+        document.getElementById("lockBanner").style.display = "block";
+        return;
+      }
+
+      const data = await resp.json();
+      todosAnuncios = data.anuncios;
+
+      document.getElementById("buscasRestantes").textContent =
+        `${data.buscas_restantes} buscas restantes hoje`;
+
+      renderStats(data);
+      if (data.padroes) renderPadroes(data.padroes);
+      renderAds();
+
+      document.getElementById("statsBar").style.display = "flex";
+      document.getElementById("sectionTitle").style.display = "flex";
+      document.getElementById("planosSection").style.display = "none";
+
+    } catch(e) {
+      alert("Erro: " + e.message);
+    }
+  }
+
+  // ── Render ──
+
+  function fmt(n) {
+    if (n >= 1000000) return (n/1000000).toFixed(1) + "M";
+    if (n >= 1000)    return (n/1000).toFixed(0) + "K";
+    return n;
+  }
+
+  function iniciais(nome) {
+    return nome.split(" ").slice(0,2).map(w => w[0]).join("").toUpperCase();
+  }
+
+  function renderStats(data) {
+    const ads = data.anuncios;
+    const total = ads.length;
+    const media = total ? Math.round(ads.reduce((s,a) => s + a.dias, 0) / total) : 0;
+    const totalImp = ads.reduce((s,a) => s + (a.impressoes_max||0), 0);
+
+    const padroes = data.padroes || {};
+    const top = Object.entries(padroes).sort((a,b) => b[1]-a[1])[0];
+    const nomes = { antes_depois:"Antes/Depois", urgencia:"Urgência", autoridade:"Autoridade", prova_social:"Prova Social" };
+
+    document.getElementById("statTotal").textContent  = total;
+    document.getElementById("statMedia").textContent  = media + "d";
+    document.getElementById("statFormato").textContent = top ? nomes[top[0]] : "—";
+    document.getElementById("statImp").textContent    = fmt(totalImp);
+  }
+
+  function renderPadroes(padroes) {
+    const nomes = { antes_depois:"Antes/Depois", urgencia:"Urgência", autoridade:"Autoridade", prova_social:"Prova Social" };
+    const max = Math.max(...Object.values(padroes));
+    const grid = document.getElementById("padroesGrid");
+    grid.innerHTML = Object.entries(padroes)
+      .sort((a,b) => b[1]-a[1])
+      .map(([k,v]) => `
+        <div class="padrao-card ${v===max?'top':''}">
+          <div class="padrao-nome">${nomes[k]||k}${v===max?' ⭐':''}</div>
+          <div class="padrao-count">${v}</div>
+        </div>
+      `).join("");
+    document.getElementById("padroesSection").style.display = "block";
+  }
+
+  function renderAds() {
+    let ads = filtroAtual === "todos" ? todosAnuncios : todosAnuncios.filter(a => a.formato === filtroAtual);
+    ads = [...ads].sort((a,b) => ordenacaoAtual === "dias" ? b.dias - a.dias : b.impressoes_max - a.impressoes_max);
+
+    const tagMap = {
+      antes_depois: ["Antes/Depois","purple"],
+      urgencia:     ["Urgência","blue"],
+      autoridade:   ["Autoridade","blue"],
+      prova_social: ["Prova Social","green"],
+    };
+
+    document.getElementById("adsGrid").innerHTML = ads.map(ad => {
+      const [tagLabel, tagColor] = tagMap[ad.formato] || [ad.formato, "gray"];
+      return `
+        <div class="ad-card">
+          <div>
+            <div class="ad-header">
+              <div class="ad-avatar">${iniciais(ad.page_name)}</div>
+              <div>
+                <div class="ad-page">${ad.page_name}</div>
+                <div class="ad-time">Ativo há ${ad.dias} dias</div>
+              </div>
+            </div>
+            <div class="ad-title">${ad.titulo}</div>
+            <div class="ad-body">${ad.corpo}</div>
+            <div class="ad-meta">
+              <span class="tag ${tagColor}">${tagLabel}</span>
+              <span class="tag green">${fmt(ad.impressoes_min)}–${fmt(ad.impressoes_max)} impressões</span>
+              <span class="tag gray">R$${fmt(ad.gasto_min)}–R$${fmt(ad.gasto_max)}</span>
+            </div>
+          </div>
+          <div class="ad-side">
+            <div class="dias-badge">${ad.dias}<small>dias</small></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function filtrar(fmt, btn) {
+    filtroAtual = fmt;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderAds();
+  }
+
+  function ordenar(v) {
+    ordenacaoAtual = v;
+    renderAds();
+  }
+
+  // ── Planos ──
+
+  async function carregarPlanos() {
+    try {
+      const resp = await fetch(`${API}/planos`);
+      const planos = await resp.json();
+      renderPlanos(planos);
+    } catch(e) {
+      // Backend offline — mostra planos estáticos
+      renderPlanos({
+        free:  { nome:"Free", preco:0, limite_buscas_dia:3, limite_resultados:5, padroes:false, export:false },
+        pro:   { nome:"Pro", preco:97, limite_buscas_dia:999, limite_resultados:50, padroes:true, export:true },
+        elite: { nome:"Elite", preco:197, limite_buscas_dia:999, limite_resultados:200, padroes:true, export:true },
+      });
+    }
+  }
+
+  function renderPlanos(planos) {
+    const grid = document.getElementById("planosGrid");
+    const ordem = ["free","pro","elite"];
+    grid.innerHTML = ordem.map(key => {
+      const p = planos[key];
+      const destaque = key === "pro";
+      return `
+        <div class="plano-card ${destaque?'destaque':''}">
+          <div class="plano-nome">${p.nome}</div>
+          <div class="plano-preco">R$${p.preco}<small>/mês</small></div>
+          <ul class="plano-features">
+            <li>${p.limite_buscas_dia === 999 ? 'Buscas ilimitadas' : p.limite_buscas_dia + ' buscas/dia'}</li>
+            <li>${p.limite_resultados} resultados por busca</li>
+            <li class="${p.padroes?'':'no'}">Análise de padrões</li>
+            <li class="${p.export?'':'no'}">Exportar CSV</li>
+          </ul>
+          <button class="btn ${destaque?'btn-primary':'btn-outline'}" style="width:100%" onclick="assinar('${key}')">
+            ${p.preco === 0 ? 'Começar grátis' : 'Assinar'}
+          </button>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function assinar(plano) {
+    if (!token) { abrirModal("cadastro"); return; }
+    // Em produção: redirecionar para Stripe Checkout
+    alert(`Integração com Stripe em breve!\nPlano selecionado: ${plano}`);
+  }
+
+  function irParaPlanos() {
+    document.getElementById("planosSection").style.display = "block";
+    document.getElementById("planosSection").scrollIntoView({ behavior: "smooth" });
+  }
+</script>
+</body>
+</html>
